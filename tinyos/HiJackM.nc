@@ -108,7 +108,6 @@ implementation {
 
     msp430_compare_control_t y_both = {
          cm     : 3,  // capture on both edge
-         //cm     : 1,  // capture rising
          ccis   : 1,  // capture input select
          clld   : 0,  // TBCL1 loads on write to TBCCR1
          cap    : 1,  // capture mode
@@ -247,7 +246,6 @@ implementation {
     async event void GenTimerCompare.fired()
     {
         atomic {
-            call GenTimerCompare.setEventFromPrev( INTERVAL );
             if(currentPin == 1) {
                 // first iteration check for symbol
                 if( currentSym == 0 ) {
@@ -306,6 +304,7 @@ implementation {
                         break;
                 }
             }
+            call GenTimerCompare.setEventFromNow( INTERVAL );
         }
     }
 

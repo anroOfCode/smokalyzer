@@ -41,6 +41,7 @@ module HiJackAppM {
       interface Leds;
       interface HplMsp430GeneralIO as ADCIn;
       interface Timer<TMilli> as ADCTimer;
+      interface Timer<TMilli> as HijackTimer;
       interface HiJack;
     }
 }
@@ -49,12 +50,50 @@ implementation {
     uint8_t uartByteTx[6] = {0, 0, 0, 0, 0, 0};
     uint8_t uartByteRx;
 
+    uint8_t uartByteTxBuff[16] = {0xDD, 0x07, 0xAA, 0xBB, 0x00, 0x00, 0x00, 0x00, 0xAE};
+    
+    // Sending position for uartByteTxBuff.
+    uint8_t uartByteTxBuffPos = 0;
+
     uint16_t adcBuffer;
     uint8_t adcCounter = 0;
 
+    void updateTxBuffer() {
+        uint8_t byteTxIdx = 0;
+        uint8_t buffTxIdx = 0;
+        uint8_t checksum = 0;
+
+        // Start byte
+        uartByteTxBuff[buffTxIdx++] = 0xDD;
+
+        // Set length to zero for now.
+        uartByteTxBuff[buffTxIdx++] = 0;
+
+        for (byteTxIdx = 0; byteTxIdx < 6; byteTxIdx++) {
+            // Escape the byte if it looks like our
+            // beloved start byte.
+            if (uartByteTx[byteTxIdx] == 0xDD) {
+                uartByteTxBuff[buffTxIdx++] = 0xCC;
+                checksum += 0xCC;
+            }
+
+            uartByteTxBuff[buffTxIdx++] = uartByteTx[byteTxIdx];
+            checksum += uartByteTx[byteTxIdx];
+        }
+
+        // Set the length equal to the data + checksum
+        // length.
+        uartByteTxBuff[1] = buffTxIdx - 1;
+
+        uartByteTxBuff[buffTxIdx++] = checksum;
+
+        // Escape the buffer just in case, we should
+        // rely on the length however to send. 
+        uartByteTxBuff[buffTxIdx++] = 0;
+    }
+
     void task sendTask()
     {
-
         // enable ADC conversion
         ADC12CTL0 |= ENC + ADC12SC;
 
@@ -77,8 +116,7 @@ implementation {
                 adcBuffer = 0;
             }
 
-            uartByteTx = (uint8_t)(ADC12MEM0>>4); // use the top 8 bits only
-            call HiJack.send(uartByteTx);                    
+            //call HiJack.send(uartByteTxBuff[uartByteTxBuffPos++]);      
         }
     }
 
@@ -96,10 +134,13 @@ implementation {
             // select A6, Vref=AVcc
             ADC12MCTL0 = INCH_6;
 
+            // Build a blank tx buffer
+            updateTxBuffer();
+
             // Initialize a 15ms periodic timer
             // to read and send the data.
             call ADCTimer.startPeriodic(15);
-
+            call HijackTimer.startPeriodic(20);
         }
     }
 
@@ -112,11 +153,19 @@ implementation {
         }
     }
 
-    async event void HiJack.sendDone(uint8_t byte, error_t error)
+    event void HijackTimer.fired()
     {
         atomic {
-            post sendTask();
+            if (uartByteTxBuffPos == 9) {
+                updateTxBuffer();
+                uartByteTxBuffPos = 0;
+            }
+            call HiJack.send(uartByteTxBuff[uartByteTxBuffPos++]);           
         }
+    }
+
+    async event void HiJack.sendDone(uint8_t byte, error_t error)
+    {
     }
 
     async event void HiJack.receive(uint8_t byte) 

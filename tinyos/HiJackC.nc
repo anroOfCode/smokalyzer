@@ -66,7 +66,10 @@ implementation {
     // High-level application initialized here.
     components HiJackAppM;
     components new TimerMilliC() as Timer0;
+    components new TimerMilliC() as Timer1;
+
     HiJackAppM.ADCTimer -> Timer0;
+    HiJackAppM.HijackTimer -> Timer1;
     HiJackAppM.ADCIn -> GeneralIOC.Port66; // ADC6
     HiJackAppM.HiJack -> HiJackM;
     HiJackAppM.Boot -> Main;
