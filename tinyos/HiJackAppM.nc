@@ -47,16 +47,171 @@ module HiJackAppM {
 }
 
 implementation {
-    uint8_t uartByteTx[6] = {0, 0, 0, 0, 0, 0};
-    uint8_t uartByteRx;
+    ///////////////////////////////////
+    // Primary interrupt-driven tasks:
+    ///////////////////////////////////
 
+    // Reads the ADC and fills the in-memory tx buffer
+    // with the ADC values.
+    void task readAdcTask();
+
+    // Sends the tx send buffer to the phone host
+    // and generates it at packet boundaries.
+    void task sendDataTask();
+
+    /////////////////////////////////
+    // Helper functions:
+    /////////////////////////////////
+
+    // Takes uartByteTx and generates a new uartByteTxBuff
+    // from it, call at packet boundraies.
+    void updateTxBuffer();
+
+    // Recieves a single byte and controls receiving
+    // packets. Since we're using a really simple
+    // implementation this function is fairly rudimentary.
+    void updateRxBuffer(uint8_t byte);
+
+    //////////////////////////////////
+    // Member variables
+    //////////////////////////////////
+
+    // Data buffer, the ADC and other values write
+    // to this thing.
+    // Bytes 0-1 : 16-bit Current ADC Reading
+    // Bytes 2-3 : 16-bit Low Calibration Point
+    // Bytes 4-5 : 16-bit High Calibration Point
+    uint8_t uartByteTx[6] = {0, 0, 0, 0, 0, 0};
+
+    // Output buffer, bigger to allow for the header byte,
+    // length, and escaping of special characters.
     uint8_t uartByteTxBuff[16] = {0xDD, 0x07, 0xAA, 0xBB, 0x00, 0x00, 0x00, 0x00, 0xAE};
+
+    // Input buffer, big enough to store escaped
+    // characters and stuff.
+    uint8_t uartByteRxBuff[11];
     
     // Sending position for uartByteTxBuff.
     uint8_t uartByteTxBuffPos = 0;
 
+    // 16 12-bit ADC readings are added to this
+    // buffer to obtain a 16-bit sample with gaussian
+    // over-sampling.
     uint16_t adcBuffer;
+
     uint8_t adcCounter = 0;
+
+    ////////////////////////////////
+    // Implementation
+    ////////////////////////////////
+
+    ////////////////////////////////
+    // Wired up events
+
+    event void Boot.booted()
+    {
+        // Enables ADC functionality on
+        // this pin. 
+        call ADCIn.makeInput();
+        call ADCIn.selectModuleFunc();
+
+        atomic {
+            // Turn on ADC12, set sampling time
+            ADC12CTL0 = ADC12ON + SHT0_7;
+            ADC12CTL1 = CSTARTADD_0 + SHP;
+
+            // select A6, Vref=AVcc
+            ADC12MCTL0 = INCH_6;
+
+            // Build a blank tx buffer
+            updateTxBuffer();
+
+            // Start a 15ms periodic timer
+            // to read the ADC pin
+            call ADCTimer.startPeriodic(15);
+
+            // Start a 15ms periodic timer to
+            // send the data. 
+            call HijackTimer.startPeriodic(15);
+        }
+    }
+
+    
+    async event void HiJack.sendDone(uint8_t byte, error_t error)
+    {
+    }
+
+    async event void HiJack.receive(uint8_t byte) 
+    {
+        atomic {
+            // map the byte to sampling rate
+            //samplePeriod = (uint16_t)2560.0/(byte+1)/2;
+            //uartByteRx = byte;
+            //call ADCTimer.stop();
+            //call ADCTimer.startOneShot(samplePeriod);
+        }
+    }
+
+    // Periodic timer task to cause a sampling of the ADC
+    // every 15ms or so.
+    event void ADCTimer.fired()
+    {
+        atomic {
+            post readAdcTask();
+        }
+    }
+
+    event void HijackTimer.fired()
+    {
+        atomic {
+            post sendDataTask();
+        }
+    }
+
+    ////////////////////////////////
+    // Tasks
+
+    void task readAdcTask()
+    {
+        // enable ADC conversion
+        ADC12CTL0 |= ENC + ADC12SC;
+
+        // TODO: Wait for conversion to complete. This is
+        // not the best way to do things, but getting
+        // the 12-bit ADC TinyOS library working will
+        // take longer.
+        while (ADC12CTL1 & ADC12BUSY);
+        
+        adcBuffer += ADC12MEM0;        
+        adcCounter++;
+
+        atomic {
+            // By sampling 16 times we get a few bits of
+            // extra data.
+            if (adcCounter == 16) {
+                uartByteTx[0] = (adcBuffer >> 8) & 0xFF;
+                uartByteTx[1] = adcBuffer & 0xFF;
+                adcCounter = 0;
+                adcBuffer = 0;
+            }
+
+            //call HiJack.send(uartByteTxBuff[uartByteTxBuffPos++]);      
+        }
+    }
+
+    void task sendDataTask()
+    {
+        atomic {
+            if (uartByteTxBuffPos == 9) {
+                updateTxBuffer();
+                uartByteTxBuffPos = 0;
+            }
+            call HiJack.send(uartByteTxBuff[uartByteTxBuffPos++]);           
+        }
+    }
+
+    ////////////////////////////////
+    // Helper Functions
 
     void updateTxBuffer() {
         uint8_t byteTxIdx = 0;
@@ -91,92 +246,4 @@ implementation {
         // rely on the length however to send. 
         uartByteTxBuff[buffTxIdx++] = 0;
     }
-
-    void task sendTask()
-    {
-        // enable ADC conversion
-        ADC12CTL0 |= ENC + ADC12SC;
-
-        // TODO: Wait for conversion to complete. This is
-        // not the best way to do things, but getting
-        // the 12-bit ADC TinyOS library working will
-        // take longer.
-        while (ADC12CTL1 & ADC12BUSY);
-        
-        adcBuffer += ADC12MEM0;        
-        adcCounter++;
-
-        atomic {
-            // By sampling 16 times we get a few bits of
-            // extra data.
-            if (adcCounter == 16) {
-                uartByteTx[0] = (adcBuffer >> 8) & 0xFF;
-                uartByteTx[1] = adcBuffer & 0xFF;
-                adcCounter = 0;
-                adcBuffer = 0;
-            }
-
-            //call HiJack.send(uartByteTxBuff[uartByteTxBuffPos++]);      
-        }
-    }
-
-    event void Boot.booted()
-    {
-        // Enables ADC functionality on
-        // this pin. 
-        call ADCIn.makeInput();
-        call ADCIn.selectModuleFunc();
-
-        atomic {
-            // Turn on ADC12, set sampling time
-            ADC12CTL0 = ADC12ON + SHT0_7;
-            ADC12CTL1 = CSTARTADD_0 + SHP;
-            // select A6, Vref=AVcc
-            ADC12MCTL0 = INCH_6;
-
-            // Build a blank tx buffer
-            updateTxBuffer();
-
-            // Initialize a 15ms periodic timer
-            // to read and send the data.
-            call ADCTimer.startPeriodic(15);
-            call HijackTimer.startPeriodic(20);
-        }
-    }
-
-    // Periodic timer task to cause a sampling of the ADC
-    // every 15ms or so.
-    event void ADCTimer.fired()
-    {
-        atomic {
-            post sendTask();
-        }
-    }
-
-    event void HijackTimer.fired()
-    {
-        atomic {
-            if (uartByteTxBuffPos == 9) {
-                updateTxBuffer();
-                uartByteTxBuffPos = 0;
-            }
-            call HiJack.send(uartByteTxBuff[uartByteTxBuffPos++]);           
-        }
-    }
-
-    async event void HiJack.sendDone(uint8_t byte, error_t error)
-    {
-    }
-
-    async event void HiJack.receive(uint8_t byte) 
-    {
-        atomic {
-            // map the byte to sampling rate
-            //samplePeriod = (uint16_t)2560.0/(byte+1)/2;
-            uartByteRx = byte;
-            //call ADCTimer.stop();
-            //call ADCTimer.startOneShot(samplePeriod);
-        }
-    }
 }
-
