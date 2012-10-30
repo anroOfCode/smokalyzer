@@ -1,0 +1,315 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		49DFC0D6163F6CD700251742 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 49DFC0D5163F6CD700251742 /* UIKit.framework */; };
+		49DFC0D8163F6CD700251742 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 49DFC0D7163F6CD700251742 /* Foundation.framework */; };
+		49DFC0DA163F6CD700251742 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 49DFC0D9163F6CD700251742 /* CoreGraphics.framework */; };
+		49DFC0E0163F6CD700251742 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 49DFC0DE163F6CD700251742 /* InfoPlist.strings */; };
+		49DFC0E2163F6CD700251742 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 49DFC0E1163F6CD700251742 /* main.m */; };
+		49DFC0E6163F6CD700251742 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 49DFC0E5163F6CD700251742 /* AppDelegate.m */; };
+		49DFC0E8163F6CD700251742 /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = 49DFC0E7163F6CD700251742 /* Default.png */; };
+		49DFC0EA163F6CD700251742 /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 49DFC0E9163F6CD700251742 /* Default@2x.png */; };
+		49DFC0EC163F6CD700251742 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 49DFC0EB163F6CD700251742 /* Default-568h@2x.png */; };
+		49DFC0EF163F6CD700251742 /* MainStoryboard_iPhone.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 49DFC0ED163F6CD700251742 /* MainStoryboard_iPhone.storyboard */; };
+		49DFC0F2163F6CD700251742 /* MainStoryboard_iPad.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 49DFC0F0163F6CD700251742 /* MainStoryboard_iPad.storyboard */; };
+		49DFC0F5163F6CD700251742 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 49DFC0F4163F6CD700251742 /* ViewController.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		49DFC0D1163F6CD700251742 /* Smokalyzer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Smokalyzer.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		49DFC0D5163F6CD700251742 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		49DFC0D7163F6CD700251742 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		49DFC0D9163F6CD700251742 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		49DFC0DD163F6CD700251742 /* Smokalyzer-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Smokalyzer-Info.plist"; sourceTree = "<group>"; };
+		49DFC0DF163F6CD700251742 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		49DFC0E1163F6CD700251742 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		49DFC0E3163F6CD700251742 /* Smokalyzer-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Smokalyzer-Prefix.pch"; sourceTree = "<group>"; };
+		49DFC0E4163F6CD700251742 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		49DFC0E5163F6CD700251742 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		49DFC0E7163F6CD700251742 /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
+		49DFC0E9163F6CD700251742 /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default@2x.png"; sourceTree = "<group>"; };
+		49DFC0EB163F6CD700251742 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
+		49DFC0EE163F6CD700251742 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = en; path = en.lproj/MainStoryboard_iPhone.storyboard; sourceTree = "<group>"; };
+		49DFC0F1163F6CD700251742 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = en; path = en.lproj/MainStoryboard_iPad.storyboard; sourceTree = "<group>"; };
+		49DFC0F3163F6CD700251742 /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
+		49DFC0F4163F6CD700251742 /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		49DFC0CE163F6CD700251742 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				49DFC0D6163F6CD700251742 /* UIKit.framework in Frameworks */,
+				49DFC0D8163F6CD700251742 /* Foundation.framework in Frameworks */,
+				49DFC0DA163F6CD700251742 /* CoreGraphics.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		49DFC0C6163F6CD700251742 = {
+			isa = PBXGroup;
+			children = (
+				49DFC0DB163F6CD700251742 /* Smokalyzer */,
+				49DFC0D4163F6CD700251742 /* Frameworks */,
+				49DFC0D2163F6CD700251742 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		49DFC0D2163F6CD700251742 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				49DFC0D1163F6CD700251742 /* Smokalyzer.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		49DFC0D4163F6CD700251742 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				49DFC0D5163F6CD700251742 /* UIKit.framework */,
+				49DFC0D7163F6CD700251742 /* Foundation.framework */,
+				49DFC0D9163F6CD700251742 /* CoreGraphics.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		49DFC0DB163F6CD700251742 /* Smokalyzer */ = {
+			isa = PBXGroup;
+			children = (
+				49DFC0E4163F6CD700251742 /* AppDelegate.h */,
+				49DFC0E5163F6CD700251742 /* AppDelegate.m */,
+				49DFC0ED163F6CD700251742 /* MainStoryboard_iPhone.storyboard */,
+				49DFC0F0163F6CD700251742 /* MainStoryboard_iPad.storyboard */,
+				49DFC0F3163F6CD700251742 /* ViewController.h */,
+				49DFC0F4163F6CD700251742 /* ViewController.m */,
+				49DFC0DC163F6CD700251742 /* Supporting Files */,
+			);
+			path = Smokalyzer;
+			sourceTree = "<group>";
+		};
+		49DFC0DC163F6CD700251742 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				49DFC0DD163F6CD700251742 /* Smokalyzer-Info.plist */,
+				49DFC0DE163F6CD700251742 /* InfoPlist.strings */,
+				49DFC0E1163F6CD700251742 /* main.m */,
+				49DFC0E3163F6CD700251742 /* Smokalyzer-Prefix.pch */,
+				49DFC0E7163F6CD700251742 /* Default.png */,
+				49DFC0E9163F6CD700251742 /* Default@2x.png */,
+				49DFC0EB163F6CD700251742 /* Default-568h@2x.png */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		49DFC0D0163F6CD700251742 /* Smokalyzer */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 49DFC0F8163F6CD700251742 /* Build configuration list for PBXNativeTarget "Smokalyzer" */;
+			buildPhases = (
+				49DFC0CD163F6CD700251742 /* Sources */,
+				49DFC0CE163F6CD700251742 /* Frameworks */,
+				49DFC0CF163F6CD700251742 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Smokalyzer;
+			productName = Smokalyzer;
+			productReference = 49DFC0D1163F6CD700251742 /* Smokalyzer.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		49DFC0C8163F6CD700251742 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0450;
+				ORGANIZATIONNAME = "Andrew Robinson";
+			};
+			buildConfigurationList = 49DFC0CB163F6CD700251742 /* Build configuration list for PBXProject "Smokalyzer" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 49DFC0C6163F6CD700251742;
+			productRefGroup = 49DFC0D2163F6CD700251742 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				49DFC0D0163F6CD700251742 /* Smokalyzer */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		49DFC0CF163F6CD700251742 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				49DFC0E0163F6CD700251742 /* InfoPlist.strings in Resources */,
+				49DFC0E8163F6CD700251742 /* Default.png in Resources */,
+				49DFC0EA163F6CD700251742 /* Default@2x.png in Resources */,
+				49DFC0EC163F6CD700251742 /* Default-568h@2x.png in Resources */,
+				49DFC0EF163F6CD700251742 /* MainStoryboard_iPhone.storyboard in Resources */,
+				49DFC0F2163F6CD700251742 /* MainStoryboard_iPad.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		49DFC0CD163F6CD700251742 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				49DFC0E2163F6CD700251742 /* main.m in Sources */,
+				49DFC0E6163F6CD700251742 /* AppDelegate.m in Sources */,
+				49DFC0F5163F6CD700251742 /* ViewController.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		49DFC0DE163F6CD700251742 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				49DFC0DF163F6CD700251742 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		49DFC0ED163F6CD700251742 /* MainStoryboard_iPhone.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				49DFC0EE163F6CD700251742 /* en */,
+			);
+			name = MainStoryboard_iPhone.storyboard;
+			sourceTree = "<group>";
+		};
+		49DFC0F0163F6CD700251742 /* MainStoryboard_iPad.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				49DFC0F1163F6CD700251742 /* en */,
+			);
+			name = MainStoryboard_iPad.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		49DFC0F6163F6CD700251742 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		49DFC0F7163F6CD700251742 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		49DFC0F9163F6CD700251742 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "Smokalyzer/Smokalyzer-Prefix.pch";
+				INFOPLIST_FILE = "Smokalyzer/Smokalyzer-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		49DFC0FA163F6CD700251742 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "Smokalyzer/Smokalyzer-Prefix.pch";
+				INFOPLIST_FILE = "Smokalyzer/Smokalyzer-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		49DFC0CB163F6CD700251742 /* Build configuration list for PBXProject "Smokalyzer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				49DFC0F6163F6CD700251742 /* Debug */,
+				49DFC0F7163F6CD700251742 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		49DFC0F8163F6CD700251742 /* Build configuration list for PBXNativeTarget "Smokalyzer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				49DFC0F9163F6CD700251742 /* Debug */,
+				49DFC0FA163F6CD700251742 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 49DFC0C8163F6CD700251742 /* Project object */;
+}
