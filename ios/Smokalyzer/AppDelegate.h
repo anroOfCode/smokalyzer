@@ -8,10 +8,8 @@
 
 #import <UIKit/UIKit.h>
 
-@class HiJackMgr;
-
 @interface AppDelegate : UIResponder <UIApplicationDelegate> {
-    HiJackMgr * hiJackMgr;
+
 }
 
 @property (strong, nonatomic) UIWindow *window;

@@ -7,7 +7,21 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "HiJackMgr.h"
 
-@interface ViewController : UIViewController
+
+@interface ViewController : UIViewController <HiJackDelegate> {
+    HiJackMgr * hiJackMgr;
+    
+}
+- (IBAction)resetMax:(id)sender;
+- (IBAction)calibrateZeroBtn:(id)sender;
+- (IBAction)calibrateSpanBtn:(id)sender;
+
+- (void)updateLabels;
+- (void)doUpdate;
+
+@property (retain, nonatomic) IBOutlet UILabel *currentLabel;
+@property (retain, nonatomic) IBOutlet UILabel *maxLabel;
 
 @end
