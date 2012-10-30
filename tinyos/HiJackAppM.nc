@@ -309,9 +309,10 @@ implementation {
         }
 
         if (sum == uartRxBuff[uartRxPosition - 1]) {
-            P4DIR |= (1 << 5);
-            P4OUT |= (1 << 5);
+            // Write new calibration data and 
+            // read it back to the tx buffer.
             call InternalFlash.write((void*)0x00, uartRxBuff, 4);
+            call InternalFlash.read((void*)0x00, uartByteTx + 2, 4);
         }
     }
 }
