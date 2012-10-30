@@ -72,6 +72,10 @@ implementation {
     // implementation this function is fairly rudimentary.
     void updateRxBuffer(uint8_t byte);
 
+    // Checks the RX buffer. If the checksum looks good
+    // it will write the new calibration data to memory.
+    void processRxBuffer();
+
     //////////////////////////////////
     // Member variables
     //////////////////////////////////
@@ -119,7 +123,6 @@ implementation {
 
     event void Boot.booted()
     {
-    uint8_t someVal[] = {0xAA, 0xBB, 0xCC, 0xDD};
         // Enables ADC functionality on
         // this pin. 
         call ADCIn.makeInput();
@@ -137,10 +140,8 @@ implementation {
             // Build a blank tx buffer
             updateTxBuffer();
 
-            // This is broken for now, we'll just
-            // store calibration info on the phone. 
-            //call InternalFlash.write((void*)0x00, someVal, 4);
-
+            // Read calibration data from
+            // MSP430 flash.
             call InternalFlash.read((void*)0x00, uartByteTx + 2, 4);
 
             // Start a 15ms periodic timer
@@ -280,7 +281,7 @@ implementation {
             case uartRx_dataEscape:
                 uartRxBuff[uartRxPosition++] = val;
                 if (uartRxPosition == uartRxReceiveSize) {
-                    // Do the right things...
+                    processRxBuffer();
                     uartRxState = uartRx_start;
                 }
                 break;
@@ -295,6 +296,22 @@ implementation {
                 break;
             default:
                 break;
+        }
+    }
+
+    void processRxBuffer() 
+    {
+        uint8_t i = 0;
+        uint8_t sum = 0;
+
+        for (i = 0; i < uartRxPosition - 1; i++) {
+            sum += uartRxBuff[i];
+        }
+
+        if (sum == uartRxBuff[uartRxPosition - 1]) {
+            P4DIR |= (1 << 5);
+            P4OUT |= (1 << 5);
+            call InternalFlash.write((void*)0x00, uartRxBuff, 4);
         }
     }
 }
