@@ -12,13 +12,17 @@
 		49DFC0DA163F6CD700251742 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 49DFC0D9163F6CD700251742 /* CoreGraphics.framework */; };
 		49DFC0E0163F6CD700251742 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 49DFC0DE163F6CD700251742 /* InfoPlist.strings */; };
 		49DFC0E2163F6CD700251742 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 49DFC0E1163F6CD700251742 /* main.m */; };
-		49DFC0E6163F6CD700251742 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 49DFC0E5163F6CD700251742 /* AppDelegate.m */; };
+		49DFC0E6163F6CD700251742 /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 49DFC0E5163F6CD700251742 /* AppDelegate.mm */; };
 		49DFC0E8163F6CD700251742 /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = 49DFC0E7163F6CD700251742 /* Default.png */; };
 		49DFC0EA163F6CD700251742 /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 49DFC0E9163F6CD700251742 /* Default@2x.png */; };
 		49DFC0EC163F6CD700251742 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 49DFC0EB163F6CD700251742 /* Default-568h@2x.png */; };
 		49DFC0EF163F6CD700251742 /* MainStoryboard_iPhone.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 49DFC0ED163F6CD700251742 /* MainStoryboard_iPhone.storyboard */; };
 		49DFC0F2163F6CD700251742 /* MainStoryboard_iPad.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 49DFC0F0163F6CD700251742 /* MainStoryboard_iPad.storyboard */; };
-		49DFC0F5163F6CD700251742 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 49DFC0F4163F6CD700251742 /* ViewController.m */; };
+		49DFC0F5163F6CD700251742 /* ViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 49DFC0F4163F6CD700251742 /* ViewController.mm */; };
+		49DFC10C163F72FF00251742 /* aurio_helper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49DFC106163F72FF00251742 /* aurio_helper.cpp */; };
+		49DFC10D163F72FF00251742 /* CADebugMacros.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49DFC108163F72FF00251742 /* CADebugMacros.cpp */; };
+		49DFC115163F7BF500251742 /* HiJackMgr.mm in Sources */ = {isa = PBXBuildFile; fileRef = 49DFC114163F7BF500251742 /* HiJackMgr.mm */; };
+		49DFC117163F7D5100251742 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 49DFC116163F7D5100251742 /* AudioToolbox.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,15 +34,24 @@
 		49DFC0DF163F6CD700251742 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		49DFC0E1163F6CD700251742 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		49DFC0E3163F6CD700251742 /* Smokalyzer-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Smokalyzer-Prefix.pch"; sourceTree = "<group>"; };
-		49DFC0E4163F6CD700251742 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
-		49DFC0E5163F6CD700251742 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		49DFC0E4163F6CD700251742 /* AppDelegate.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; name = AppDelegate.h; path = Smokalyzer/AppDelegate.h; sourceTree = "<group>"; };
+		49DFC0E5163F6CD700251742 /* AppDelegate.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = AppDelegate.mm; path = Smokalyzer/AppDelegate.mm; sourceTree = "<group>"; };
 		49DFC0E7163F6CD700251742 /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
 		49DFC0E9163F6CD700251742 /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default@2x.png"; sourceTree = "<group>"; };
 		49DFC0EB163F6CD700251742 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		49DFC0EE163F6CD700251742 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = en; path = en.lproj/MainStoryboard_iPhone.storyboard; sourceTree = "<group>"; };
 		49DFC0F1163F6CD700251742 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = en; path = en.lproj/MainStoryboard_iPad.storyboard; sourceTree = "<group>"; };
 		49DFC0F3163F6CD700251742 /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
-		49DFC0F4163F6CD700251742 /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
+		49DFC0F4163F6CD700251742 /* ViewController.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ViewController.mm; sourceTree = "<group>"; };
+		49DFC0FF163F706000251742 /* HiJackMgr.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; name = HiJackMgr.h; path = Smokalyzer/HiJackMgr.h; sourceTree = "<group>"; };
+		49DFC106163F72FF00251742 /* aurio_helper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = aurio_helper.cpp; path = Smokalyzer/aurio_helper.cpp; sourceTree = "<group>"; };
+		49DFC107163F72FF00251742 /* aurio_helper.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; name = aurio_helper.h; path = Smokalyzer/aurio_helper.h; sourceTree = "<group>"; };
+		49DFC108163F72FF00251742 /* CADebugMacros.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CADebugMacros.cpp; path = Smokalyzer/CADebugMacros.cpp; sourceTree = "<group>"; };
+		49DFC109163F72FF00251742 /* CADebugMacros.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; name = CADebugMacros.h; path = Smokalyzer/CADebugMacros.h; sourceTree = "<group>"; };
+		49DFC10A163F72FF00251742 /* CAStreamBasicDescription.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; name = CAStreamBasicDescription.h; path = Smokalyzer/CAStreamBasicDescription.h; sourceTree = "<group>"; };
+		49DFC10B163F72FF00251742 /* CAXException.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; name = CAXException.h; path = Smokalyzer/CAXException.h; sourceTree = "<group>"; };
+		49DFC114163F7BF500251742 /* HiJackMgr.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = HiJackMgr.mm; path = Smokalyzer/HiJackMgr.mm; sourceTree = "<group>"; };
+		49DFC116163F7D5100251742 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -46,6 +59,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				49DFC117163F7D5100251742 /* AudioToolbox.framework in Frameworks */,
 				49DFC0D6163F6CD700251742 /* UIKit.framework in Frameworks */,
 				49DFC0D8163F6CD700251742 /* Foundation.framework in Frameworks */,
 				49DFC0DA163F6CD700251742 /* CoreGraphics.framework in Frameworks */,
@@ -58,6 +72,8 @@
 		49DFC0C6163F6CD700251742 = {
 			isa = PBXGroup;
 			children = (
+				49DFC116163F7D5100251742 /* AudioToolbox.framework */,
+				49DFC10E163F73BB00251742 /* HiJackLib */,
 				49DFC0DB163F6CD700251742 /* Smokalyzer */,
 				49DFC0D4163F6CD700251742 /* Frameworks */,
 				49DFC0D2163F6CD700251742 /* Products */,
@@ -85,12 +101,10 @@
 		49DFC0DB163F6CD700251742 /* Smokalyzer */ = {
 			isa = PBXGroup;
 			children = (
-				49DFC0E4163F6CD700251742 /* AppDelegate.h */,
-				49DFC0E5163F6CD700251742 /* AppDelegate.m */,
 				49DFC0ED163F6CD700251742 /* MainStoryboard_iPhone.storyboard */,
 				49DFC0F0163F6CD700251742 /* MainStoryboard_iPad.storyboard */,
 				49DFC0F3163F6CD700251742 /* ViewController.h */,
-				49DFC0F4163F6CD700251742 /* ViewController.m */,
+				49DFC0F4163F6CD700251742 /* ViewController.mm */,
 				49DFC0DC163F6CD700251742 /* Supporting Files */,
 			);
 			path = Smokalyzer;
@@ -108,6 +122,23 @@
 				49DFC0EB163F6CD700251742 /* Default-568h@2x.png */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		49DFC10E163F73BB00251742 /* HiJackLib */ = {
+			isa = PBXGroup;
+			children = (
+				49DFC114163F7BF500251742 /* HiJackMgr.mm */,
+				49DFC106163F72FF00251742 /* aurio_helper.cpp */,
+				49DFC107163F72FF00251742 /* aurio_helper.h */,
+				49DFC108163F72FF00251742 /* CADebugMacros.cpp */,
+				49DFC109163F72FF00251742 /* CADebugMacros.h */,
+				49DFC10A163F72FF00251742 /* CAStreamBasicDescription.h */,
+				49DFC10B163F72FF00251742 /* CAXException.h */,
+				49DFC0FF163F706000251742 /* HiJackMgr.h */,
+				49DFC0E4163F6CD700251742 /* AppDelegate.h */,
+				49DFC0E5163F6CD700251742 /* AppDelegate.mm */,
+			);
+			name = HiJackLib;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -178,8 +209,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				49DFC0E2163F6CD700251742 /* main.m in Sources */,
-				49DFC0E6163F6CD700251742 /* AppDelegate.m in Sources */,
-				49DFC0F5163F6CD700251742 /* ViewController.m in Sources */,
+				49DFC0E6163F6CD700251742 /* AppDelegate.mm in Sources */,
+				49DFC0F5163F6CD700251742 /* ViewController.mm in Sources */,
+				49DFC10C163F72FF00251742 /* aurio_helper.cpp in Sources */,
+				49DFC10D163F72FF00251742 /* CADebugMacros.cpp in Sources */,
+				49DFC115163F7BF500251742 /* HiJackMgr.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -268,10 +302,19 @@
 		49DFC0F9163F6CD700251742 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "compiler-default";
+				CLANG_CXX_LIBRARY = "compiler-default";
+				CLANG_ENABLE_OBJC_ARC = NO;
+				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Smokalyzer/Smokalyzer-Prefix.pch";
+				GCC_PREPROCESSOR_DEFINITIONS = "";
 				INFOPLIST_FILE = "Smokalyzer/Smokalyzer-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/Smokalyzer\"",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};
@@ -280,10 +323,18 @@
 		49DFC0FA163F6CD700251742 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "compiler-default";
+				CLANG_CXX_LIBRARY = "compiler-default";
+				CLANG_ENABLE_OBJC_ARC = NO;
+				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Smokalyzer/Smokalyzer-Prefix.pch";
 				INFOPLIST_FILE = "Smokalyzer/Smokalyzer-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/Smokalyzer\"",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};
@@ -308,6 +359,7 @@
 				49DFC0FA163F6CD700251742 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

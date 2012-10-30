@@ -7,11 +7,13 @@
 //
 
 #import "AppDelegate.h"
+#import "HiJackMgr.h"
 
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
+    hiJackMgr = [[HiJackMgr alloc] init];
     // Override point for customization after application launch.
     return YES;
 }
