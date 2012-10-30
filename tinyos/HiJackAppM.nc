@@ -87,9 +87,18 @@ implementation {
     // length, and escaping of special characters.
     uint8_t uartByteTxBuff[16] = {0xDD, 0x07, 0xAA, 0xBB, 0x00, 0x00, 0x00, 0x00, 0xAE};
 
+    enum uartRxEnum {
+        uartRx_data,
+        uartRx_dataEscape,
+        uartRx_size,
+        uartRx_start
+    };
     // Input buffer, big enough to store escaped
     // characters and stuff.
-    uint8_t uartByteRxBuff[11];
+    uint8_t uartRxBuff[11];
+    uint8_t uartRxPosition = 0;
+    uint8_t uartRxReceiveSize = 0;
+    enum uartRxEnum uartRxState = uartRx_start;
 
     // Sending position for uartByteTxBuff.
     uint8_t uartByteTxBuffPos = 0;
@@ -230,7 +239,8 @@ implementation {
         for (byteTxIdx = 0; byteTxIdx < 6; byteTxIdx++) {
             // Escape the byte if it looks like our
             // beloved start byte.
-            if (uartByteTx[byteTxIdx] == 0xDD) {
+            if (uartByteTx[byteTxIdx] == 0xDD ||
+                uartByteTx[byteTxIdx] == 0xCC) {
                 uartByteTxBuff[buffTxIdx++] = 0xCC;
                 checksum += 0xCC;
             }
@@ -250,9 +260,41 @@ implementation {
         uartByteTxBuff[buffTxIdx++] = 0;
     }
 
-    void updateRxBuffer(uint8_t byte) 
+    void updateRxBuffer(uint8_t val) 
     {
-        // Until we figure out how to store data
-        // on the internal flash this is a no-op.
+        if (val == 0xDD &&
+            uartRxState != uartRx_dataEscape) {
+            uartRxState = uartRx_size;
+            uartRxPosition = 0;
+            return;
+        }
+
+        switch (uartRxState) {
+            case uartRx_data:
+                if (val == 0xCC) {
+                    uartRxState = uartRx_dataEscape;
+                    uartRxReceiveSize--;
+                    break;
+                }
+                // INTENTIONAL FALL THROUGH
+            case uartRx_dataEscape:
+                uartRxBuff[uartRxPosition++] = val;
+                if (uartRxPosition == uartRxReceiveSize) {
+                    // Do the right things...
+                    uartRxState = uartRx_start;
+                }
+                break;
+            case uartRx_size:
+                // Arbitrary large packet size
+                if (val > 20) {
+                    uartRxState = uartRx_start;
+                    break;
+                }
+                uartRxReceiveSize = val;
+                uartRxState = uartRx_data;
+                break;
+            default:
+                break;
+        }
     }
 }
