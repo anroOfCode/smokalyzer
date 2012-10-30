@@ -33,7 +33,7 @@ implementation {
         IFLASH_INVALID_VNUM = -1,
     };
 
-    uint8_t getcurRentsegment() 
+    uint8_t getCurrentSegment() 
     {
         int8_t vnum0 = *(int8_t*)IFLASH_SEG0_VNUM_ADDR;
         int8_t vnum1 = *(int8_t*)IFLASH_SEG1_VNUM_ADDR;
@@ -72,7 +72,7 @@ implementation {
         oldPtr = (int8_t*)IFLASH_OFFSET;
 
 
-        if (getCurentSegment()) {
+        if (getCurrentSegment()) {
             // Segment 1 is active, we're switching to Segment 0
             oldPtr += IFLASH_SIZE;
         }
@@ -153,7 +153,7 @@ implementation {
     {
         addr += IFLASH_OFFSET;
 
-        if (getCurentSegment()) {
+        if (getCurrentSegment()) {
             addr += IFLASH_SIZE;       
         }
 
