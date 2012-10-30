@@ -26,8 +26,20 @@
     
     pthread_mutex_t mutex;
     
-    uint8_t incomingByteArray[32];
-    uint8_t incomingBytePosition;
+    enum uartRxEnum {
+        uartRx_data,
+        uartRx_dataEscape,
+        uartRx_size,
+        uartRx_start
+    };
+    
+    // Input buffer, big enough to store escaped
+    // characters and stuff.
+    uint8_t uartRxBuff[11];
+    uint8_t uartRxPosition;
+    uint8_t uartRxReceiveSize;
+    enum uartRxEnum uartRxState;
+    
 }
 
 - (void)viewDidLoad
@@ -40,7 +52,9 @@
     lowCalVal = 0;
     highCalVal = 1;
     
-    incomingBytePosition = 0;
+    uartRxPosition = 0;
+    uartRxReceiveSize = 0;
+    uartRxState = uartRx_start;
     
     pthread_mutex_init(&mutex, NULL);
     
@@ -48,13 +62,62 @@
 	// Do any additional setup after loading the view, typically from a nib.
 }
 
-- (int) receive:(UInt8)data
+- (int) receive:(UInt8)val
 {
+    if (val == 0xDD &&
+        uartRxState != uartRx_dataEscape) {
+        uartRxState = uartRx_size;
+        uartRxPosition = 0;
+        return 0;
+    }
     
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [self updateLabels];
-    });
-
+    switch (uartRxState) {
+        case uartRx_data:
+            if (val == 0xCC) {
+                uartRxState = uartRx_dataEscape;
+                uartRxReceiveSize--;
+                break;
+            }
+            // INTENTIONAL FALL THROUGH
+        case uartRx_dataEscape:
+            uartRxBuff[uartRxPosition++] = val;
+            if (uartRxPosition == uartRxReceiveSize) {
+                
+                // Update the current CO, and cal values.
+                uint8_t i = 0;
+                uint8_t sum = 0;
+                
+                for (i = 0; i < uartRxPosition - 1; i++) {
+                    sum += uartRxBuff[i];
+                }
+                
+                if (sum == uartRxBuff[uartRxPosition - 1]) {
+                    
+                    pthread_mutex_lock(&mutex);
+                    currentVal = (uartRxBuff[0] << 8) + uartRxBuff[1];
+                    lowCalVal = (uartRxBuff[2] << 8) + uartRxBuff[3];
+                    highCalVal = (uartRxBuff[4] << 8) + uartRxBuff[5];
+                    pthread_mutex_unlock(&mutex);
+                }
+                
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [self updateLabels];
+                });
+                uartRxState = uartRx_start;
+            }
+            break;
+        case uartRx_size:
+            // Arbitrary large packet size
+            if (val > 20) {
+                uartRxState = uartRx_start;
+                break;
+            }
+            uartRxReceiveSize = val;
+            uartRxState = uartRx_data;
+            break;
+        default:
+            break;
+    }
     return 0;
 }
 
@@ -77,7 +140,9 @@
 }
 
 - (IBAction)resetMax:(id)sender {
+    pthread_mutex_lock(&mutex);
     maxVal = lowCalVal;
+    pthread_mutex_unlock(&mutex);
 }
 
 - (IBAction)calibrateZeroBtn:(id)sender {
@@ -99,12 +164,15 @@
 }
 
 - (void)doUpdate {
+    
+    pthread_mutex_lock(&mutex);
     uint8_t outBuffer[] = {
-        (lowCalVal << 8) & 0xFF,
-        (lowCalVal & 0xFF),
-        (highCalVal << 8) & 0xFF,
-        (highCalVal & 0xFF)
+        (newLowCalVal >> 8) & 0xFF,
+        (newLowCalVal & 0xFF),
+        (newHighCalVal >> 8) & 0xFF,
+        (newHighCalVal & 0xFF)
     };
+    pthread_mutex_unlock(&mutex);
     
     uint8_t checksum = 0;
     uint8_t outgoingByteArray[32];
@@ -145,9 +213,9 @@
     }
     
     self.currentLabel.text = [NSString stringWithFormat: @"%.2f",
-                              ((double)currentVal - (double)lowCalVal) / (double)(highCalVal - lowCalVal)];
+                              ((double)currentVal - (double)lowCalVal) / (double)(highCalVal - lowCalVal) * 20];
     self.maxLabel.text = [NSString stringWithFormat: @"%.2f",
-                          ((double)currentVal - (double)lowCalVal) / (double)(highCalVal - lowCalVal)];
+                          ((double)maxVal - (double)lowCalVal) / (double)(highCalVal - lowCalVal) * 20];
     pthread_mutex_unlock(&mutex);
 }
 
