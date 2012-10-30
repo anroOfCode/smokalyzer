@@ -252,9 +252,9 @@ static OSStatus	PerformThru(
 							// we should now have the stopbit
 							if (sample == 1) {
 								// we have a new and valid byte!
-#ifdef DECDEBUGBYTE
+//#ifdef DECDEBUGBYTE
 								printf(" ++ StopBit: %ld UartByte 0x%x\n", sample, uartByte);
-#endif
+//#endif
 								NSAutoreleasePool	 *autoreleasepool = [[NSAutoreleasePool alloc] init];
 								//////////////////////////////////////////////
 								// This is where we receive the byte!!!
