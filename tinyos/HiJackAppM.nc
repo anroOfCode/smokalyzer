@@ -110,13 +110,14 @@ implementation {
 
     event void Boot.booted()
     {
-    uint16_t someVal = 0xabdc;
+    uint8_t someVal[] = {0xAA, 0xBB, 0xCC, 0xDD};
         // Enables ADC functionality on
         // this pin. 
         call ADCIn.makeInput();
         call ADCIn.selectModuleFunc();
 
         atomic {
+
             // Turn on ADC12, set sampling time
             ADC12CTL0 = ADC12ON + SHT0_7;
             ADC12CTL1 = CSTARTADD_0 + SHP;
@@ -129,12 +130,9 @@ implementation {
 
             // This is broken for now, we'll just
             // store calibration info on the phone. 
-            //call InternalFlash.write(0x00, &someVal, 2);
-            //call InternalFlash.write(0x02, &someVal, 2);
-            //call InternalFlash.write(0x00, &someVal, 2);
-            //call InternalFlash.write(0x02, &someVal, 2);
+            //call InternalFlash.write((void*)0x00, someVal, 4);
 
-            call InternalFlash.read(0x00, uartByteTx + 2, 4);
+            call InternalFlash.read((void*)0x00, uartByteTx + 2, 4);
 
             // Start a 15ms periodic timer
             // to read the ADC pin
