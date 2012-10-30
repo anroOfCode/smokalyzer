@@ -31,8 +31,7 @@
  */
 
 /*
- * Original Version: Thomas Schmid, Dec 23th, 2010
- * Significant Revisions: Andrew Robinson, October 24th, 2012
+ * Author: Andrew Robinson, October 24th, 2012
  */
 
 module HiJackAppM {
@@ -43,6 +42,7 @@ module HiJackAppM {
       interface Timer<TMilli> as ADCTimer;
       interface Timer<TMilli> as HijackTimer;
       interface HiJack;
+      interface InternalFlash;
     }
 }
 
@@ -90,7 +90,7 @@ implementation {
     // Input buffer, big enough to store escaped
     // characters and stuff.
     uint8_t uartByteRxBuff[11];
-    
+
     // Sending position for uartByteTxBuff.
     uint8_t uartByteTxBuffPos = 0;
 
@@ -110,6 +110,7 @@ implementation {
 
     event void Boot.booted()
     {
+    uint16_t someVal = 0xabdc;
         // Enables ADC functionality on
         // this pin. 
         call ADCIn.makeInput();
@@ -126,6 +127,15 @@ implementation {
             // Build a blank tx buffer
             updateTxBuffer();
 
+            // This is broken for now, we'll just
+            // store calibration info on the phone. 
+            //call InternalFlash.write(0x00, &someVal, 2);
+            //call InternalFlash.write(0x02, &someVal, 2);
+            //call InternalFlash.write(0x00, &someVal, 2);
+            //call InternalFlash.write(0x02, &someVal, 2);
+
+            call InternalFlash.read(0x00, uartByteTx + 2, 4);
+
             // Start a 15ms periodic timer
             // to read the ADC pin
             call ADCTimer.startPeriodic(15);
@@ -136,7 +146,7 @@ implementation {
         }
     }
 
-    
+
     async event void HiJack.sendDone(uint8_t byte, error_t error)
     {
     }
@@ -144,11 +154,7 @@ implementation {
     async event void HiJack.receive(uint8_t byte) 
     {
         atomic {
-            // map the byte to sampling rate
-            //samplePeriod = (uint16_t)2560.0/(byte+1)/2;
-            //uartByteRx = byte;
-            //call ADCTimer.stop();
-            //call ADCTimer.startOneShot(samplePeriod);
+            updateRxBuffer(byte);
         }
     }
 
@@ -181,8 +187,8 @@ implementation {
         // the 12-bit ADC TinyOS library working will
         // take longer.
         while (ADC12CTL1 & ADC12BUSY);
-        
-        adcBuffer += ADC12MEM0;        
+
+        adcBuffer += ADC12MEM0;
         adcCounter++;
 
         atomic {
@@ -194,8 +200,6 @@ implementation {
                 adcCounter = 0;
                 adcBuffer = 0;
             }
-
-            //call HiJack.send(uartByteTxBuff[uartByteTxBuffPos++]);      
         }
     }
 
@@ -206,14 +210,15 @@ implementation {
                 updateTxBuffer();
                 uartByteTxBuffPos = 0;
             }
-            call HiJack.send(uartByteTxBuff[uartByteTxBuffPos++]);           
+            call HiJack.send(uartByteTxBuff[uartByteTxBuffPos++]);
         }
     }
 
     ////////////////////////////////
     // Helper Functions
 
-    void updateTxBuffer() {
+    void updateTxBuffer()
+    {
         uint8_t byteTxIdx = 0;
         uint8_t buffTxIdx = 0;
         uint8_t checksum = 0;
@@ -243,7 +248,13 @@ implementation {
         uartByteTxBuff[buffTxIdx++] = checksum;
 
         // Escape the buffer just in case, we should
-        // rely on the length however to send. 
+        // rely on the length however to send.
         uartByteTxBuff[buffTxIdx++] = 0;
+    }
+
+    void updateRxBuffer(uint8_t byte) 
+    {
+        // Until we figure out how to store data
+        // on the internal flash this is a no-op.
     }
 }

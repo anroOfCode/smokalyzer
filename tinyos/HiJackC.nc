@@ -39,7 +39,7 @@ configuration HiJackC {
 }
 
 implementation {
-    components MainC as Main, HiJackM, LedsC, Msp430TimerC;
+    components MainC as Main, HiJackM, LedsC, Msp430TimerC, InternalFlashC;
     HiJackM.Boot -> Main;
     HiJackM.Leds -> LedsC;
     HiJackM.Timer -> Msp430TimerC.TimerA;
@@ -74,5 +74,6 @@ implementation {
     HiJackAppM.HiJack -> HiJackM;
     HiJackAppM.Boot -> Main;
     HiJackAppM.Leds -> LedsC;
+    HiJackAppM.InternalFlash -> InternalFlashC.InternalFlash;
 }
 
