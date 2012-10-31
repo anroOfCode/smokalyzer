@@ -258,7 +258,8 @@ static OSStatus	PerformThru(
 								NSAutoreleasePool	 *autoreleasepool = [[NSAutoreleasePool alloc] init];
 								//////////////////////////////////////////////
 								// This is where we receive the byte!!!
-								if([THIS->theDelegate respondsToSelector:@selector(receive:)]) {
+								if([THIS->theDelegate respondsToSelector:@selector(receive:)])
+                                {
 									[THIS->theDelegate receive:uartByte];
 								}
 								//////////////////////////////////////////////

@@ -21,7 +21,7 @@
 		49DFC0F5163F6CD700251742 /* ViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 49DFC0F4163F6CD700251742 /* ViewController.mm */; };
 		49DFC10C163F72FF00251742 /* aurio_helper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49DFC106163F72FF00251742 /* aurio_helper.cpp */; };
 		49DFC10D163F72FF00251742 /* CADebugMacros.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49DFC108163F72FF00251742 /* CADebugMacros.cpp */; };
-		49DFC115163F7BF500251742 /* HiJackMgr.mm in Sources */ = {isa = PBXBuildFile; fileRef = 49DFC114163F7BF500251742 /* HiJackMgr.mm */; };
+		49DFC115163F7BF500251742 /* HiJackMgr.mm in Sources */ = {isa = PBXBuildFile; fileRef = 49DFC114163F7BF500251742 /* HiJackMgr.mm */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		49DFC117163F7D5100251742 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 49DFC116163F7D5100251742 /* AudioToolbox.framework */; };
 /* End PBXBuildFile section */
 
@@ -304,7 +304,7 @@
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "compiler-default";
 				CLANG_CXX_LIBRARY = "compiler-default";
-				CLANG_ENABLE_OBJC_ARC = NO;
+				CLANG_ENABLE_OBJC_ARC = YES;
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Smokalyzer/Smokalyzer-Prefix.pch";
@@ -325,7 +325,7 @@
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "compiler-default";
 				CLANG_CXX_LIBRARY = "compiler-default";
-				CLANG_ENABLE_OBJC_ARC = NO;
+				CLANG_ENABLE_OBJC_ARC = YES;
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Smokalyzer/Smokalyzer-Prefix.pch";

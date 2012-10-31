@@ -35,7 +35,7 @@
     
     // Input buffer, big enough to store escaped
     // characters and stuff.
-    uint8_t uartRxBuff[11];
+    uint8_t uartRxBuff[20];
     uint8_t uartRxPosition;
     uint8_t uartRxReceiveSize;
     enum uartRxEnum uartRxState;
@@ -46,6 +46,7 @@
 {
     [super viewDidLoad];
     hiJackMgr = [[HiJackMgr alloc] init];
+    
     [hiJackMgr setDelegate:self];
     
     currentVal = 0;
@@ -64,6 +65,11 @@
 
 - (int) receive:(UInt8)val
 {
+    if (uartRxPosition > 18) {
+        uartRxPosition = 0;
+        uartRxState = uartRx_start;
+    }
+    
     if (val == 0xDD &&
         uartRxState != uartRx_dataEscape) {
         uartRxState = uartRx_size;
@@ -103,12 +109,13 @@
                 dispatch_async(dispatch_get_main_queue(), ^{
                     [self updateLabels];
                 });
+                
                 uartRxState = uartRx_start;
             }
             break;
         case uartRx_size:
             // Arbitrary large packet size
-            if (val > 20) {
+            if (val > 18) {
                 uartRxState = uartRx_start;
                 break;
             }
@@ -128,9 +135,10 @@
 }
 
 - (void)dealloc {
-    [_currentLabel release];
-    [_maxLabel release];
-    [super dealloc];
+    printf("WHARADADSFD");
+    //[_currentLabel release];
+    //[_maxLabel release];
+    //[super dealloc];
 }
 
 - (void)viewDidUnload {
@@ -207,7 +215,6 @@
 
 - (void)updateLabels {
     pthread_mutex_lock(&mutex);
-    
     if (maxVal < currentVal) {
         maxVal = currentVal;
     }
@@ -216,6 +223,7 @@
                               ((double)currentVal - (double)lowCalVal) / (double)(highCalVal - lowCalVal) * 20];
     self.maxLabel.text = [NSString stringWithFormat: @"%.2f",
                           ((double)maxVal - (double)lowCalVal) / (double)(highCalVal - lowCalVal) * 20];
+    
     pthread_mutex_unlock(&mutex);
 }
 
