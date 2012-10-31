@@ -40,6 +40,9 @@
     uint8_t uartRxReceiveSize;
     enum uartRxEnum uartRxState;
     
+    uint16_t storedValues[16];
+    uint8_t storedValueIdx;
+    
 }
 
 - (void)viewDidLoad
@@ -48,6 +51,7 @@
     hiJackMgr = [[HiJackMgr alloc] init];
     
     [hiJackMgr setDelegate:self];
+
     
     currentVal = 0;
     lowCalVal = 0;
@@ -56,6 +60,8 @@
     uartRxPosition = 0;
     uartRxReceiveSize = 0;
     uartRxState = uartRx_start;
+    
+    storedValueIdx = 0;
     
     pthread_mutex_init(&mutex, NULL);
     
@@ -100,7 +106,14 @@
                 if (sum == uartRxBuff[uartRxPosition - 1]) {
                     
                     pthread_mutex_lock(&mutex);
-                    currentVal = (uartRxBuff[0] << 8) + uartRxBuff[1];
+                    storedValues[storedValueIdx++ % 16] = (uartRxBuff[0] << 8) + uartRxBuff[1];
+                    
+                    uint32_t sum = 0;
+                    for (i = 0; i < 16; i++)
+                    {
+                        sum += storedValues[i];
+                    }
+                    currentVal = sum >> 4;
                     lowCalVal = (uartRxBuff[2] << 8) + uartRxBuff[3];
                     highCalVal = (uartRxBuff[4] << 8) + uartRxBuff[5];
                     pthread_mutex_unlock(&mutex);
