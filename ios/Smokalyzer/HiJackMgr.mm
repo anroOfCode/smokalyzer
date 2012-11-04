@@ -250,9 +250,6 @@ static void doUartEncode(void *inRefCon,UInt32 inNumberFrames, AudioBufferList *
             {
 
                 uartByteTx = THIS->uartByteTransmit;
-                #ifdef DEBUG2
-                    printf("uartByteTx: 0x%x\n", uartByteTx);
-                #endif
                 byteCounter += 1;
                 uartBitTx = 0;
                 parityTx = 0;
@@ -302,10 +299,6 @@ static void doUartEncode(void *inRefCon,UInt32 inNumberFrames, AudioBufferList *
                         }
                     }
                 }
-                
-#ifdef DEBUG
-                printf("BitTX %d: last %d next %d\n", uartBitTx, currentBit, nextBit);
-#endif
                 currentBit = nextBit;
                 uartBitTx++;
                 state = SAMEBIT;
@@ -319,9 +312,6 @@ static void doUartEncode(void *inRefCon,UInt32 inNumberFrames, AudioBufferList *
         }
         
         values[j] = (SInt32)(uartBitEnc[phaseEnc%SAMPLESPERBIT] * AMPLITUDE);
-#ifdef DEBUG
-        printf("val %ld\n", values[j]);
-#endif
         phaseEnc++;
         
     }
@@ -329,25 +319,16 @@ static void doUartEncode(void *inRefCon,UInt32 inNumberFrames, AudioBufferList *
 
 }
 
-static void doUartPowerGeneration(UInt32 inNumberFrames, AudioBufferList *ioData)
+static void doUartPowerGeneration(UInt32 inNumberFrames, AudioBuffer *outBuff)
 {
     static UInt32 phase = 0;
     SInt32 values[inNumberFrames];
-    /*******************************
-     * Generate 22kHz Tone
-     *******************************/
-    
-    double waves;
-    for(int j = 0; j < inNumberFrames; j++) {
-        waves = 0;
-        waves += sin(M_PI * phase+0.5); // This should be 22.050kHz
-        waves *= (AMPLITUDE); // <--------- make sure to divide by how many waves you're stacking
-        values[j] = (SInt32)waves;
+    for(int i = 0; i < inNumberFrames; i++) {
+        values[i] = (SInt32) (sin(M_PI * phase + 0.5) * AMPLITUDE);
         phase++;
     }
-    
     // copy sine wave into left channels.
-    memcpy(ioData->mBuffers[1].mData, values, ioData->mBuffers[1].mDataByteSize);
+    memcpy(outBuff->mData, values, outBuff->mDataByteSize);
 }
 
 static OSStatus	PerformThru(
@@ -370,7 +351,7 @@ static OSStatus	PerformThru(
     
 	if (THIS->mute == NO) {
 		// prepare sine wave
-		doUartPowerGeneration(inNumberFrames, ioData);
+		doUartPowerGeneration(inNumberFrames, &ioData->mBuffers[1]);
         doUartEncode(inRefCon, inNumberFrames, ioData);
 	}
 	
