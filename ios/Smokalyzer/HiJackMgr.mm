@@ -116,107 +116,107 @@ void propListener(	void *                  inClientData,
 
 #pragma mark -RIO Render Callback
 
-static void doUartEncode()
+static void performUpperCallback(HiJackMgr *mgrPtr, UInt8 byte)
 {
-
+    NSAutoreleasePool	 *autoreleasepool = [[NSAutoreleasePool alloc] init];
+    if([mgrPtr->theDelegate respondsToSelector:@selector(receive:)]) {
+        [mgrPtr->theDelegate receive:byte];
+    }
+    [autoreleasepool release];
 }
 
-static void doUartDecode(void *inRefCon, UInt32 inNumberFrames, SInt32 *lchannel)
+static void doUartDecode(HiJackMgr *mgrPtr, UInt32 inNumberFrames, AudioBuffer *inBuff)
 {
-    static UInt32 phase2 = 0;
-    static SInt32 sample = 0;
-    static UInt32 lastPhase2 = 0;
+    static UInt32 phase = 0;
+    static Boolean sample = 0;
+    
+    static UInt32 lastPhase = 0;
     static UInt32 lastSample = 0;
     
     static int decState = STARTBIT;
 	static int bitNum = 0;
+    
 	static uint8_t uartByte = 0;
     static UInt8 parityRx = 0;
-    
-    HiJackMgr *THIS = (HiJackMgr *)inRefCon;
-    
+
 	for(int j = 0; j < inNumberFrames; j++) {
-		float val = lchannel[j];
-		
-		phase2 += 1;
-		if (val < THRESHOLD ) {
-			sample = 0;
-		} else {
-			sample = 1;
-		}
-		if (sample != lastSample) {
-			// transition
-			SInt32 diff = phase2 - lastPhase2;
-			switch (decState) {
-				case STARTBIT:
-					if (lastSample == 0 && sample == 1)
-					{
-						// low->high transition. Now wait for a long period
-						decState = STARTBIT_FALL;
-					}
-					break;
-				case STARTBIT_FALL:
-					if (( SHORT < diff ) && (diff < LONG) )
-					{
-						// looks like we got a 1->0 transition.
-						bitNum = 0;
-						parityRx = 0;
-						uartByte = 0;
-						decState = DECODE;
-					} else {
-						decState = STARTBIT;
-					}
-					break;
-				case DECODE:
-					if (( SHORT < diff) && (diff < LONG) ) {
-						// we got a valid sample.
-						if (bitNum < 8) {
-							uartByte = ((uartByte >> 1) + (sample << 7));
-							bitNum += 1;
-							parityRx += sample;
-						} else if (bitNum == 8) {
-							// parity bit
-							if(sample != (parityRx & 0x01))
-							{
-								decState = STARTBIT;
-							} else {
-								bitNum += 1;
-							}
-						} else {
-							// we should now have the stopbit
-							if (sample == 1) {
-								// we have a new and valid byte!
-								NSAutoreleasePool	 *autoreleasepool = [[NSAutoreleasePool alloc] init];
-								//////////////////////////////////////////////
-								// This is where we receive the byte!!!
-								if([THIS->theDelegate respondsToSelector:@selector(receive:)])
-                                {
-									[THIS->theDelegate receive:uartByte];
-								}
-								//////////////////////////////////////////////
-								[autoreleasepool release];
-							}
-							decState = STARTBIT;
-						}
-					} else if (diff > LONG) {
-						decState = STARTBIT;
-					} else {
-						// don't update the phase as we have to look for the next transition
-						lastSample = sample;
-						continue;
-					}
-					
-					break;
-				default:
-					break;
-			}
-			lastPhase2 = phase2;
-		}
+    
+		float val = *(((SInt32*) inBuff->mData) + j);
+        SInt32 diff = phase - lastPhase;
+        
+		phase += 1;
+        sample = !(val < THRESHOLD);
+        
+		if (sample == lastSample) {
+            continue;
+        }
+        
+        switch (decState) {
+            case STARTBIT:
+                if (lastSample == 0 && sample == 1) {
+                    // low->high transition. Now wait for a long period
+                    decState = STARTBIT_FALL;
+                }
+                break;
+            case STARTBIT_FALL:
+                if (( SHORT < diff ) && (diff < LONG) )
+                {
+                    // looks like we got a 1->0 transition,
+                    // start actually decoding the signal.
+                    bitNum = 0;
+                    parityRx = 0;
+                    uartByte = 0;
+                    decState = DECODE;
+                } else {
+                    decState = STARTBIT;
+                }
+                break;
+            case DECODE:
+                if (( SHORT < diff) && (diff < LONG) ) {
+                    // we got a valid sample.
+                    if (bitNum < 8) {
+                        uartByte = ((uartByte >> 1) + (sample << 7));
+                        bitNum += 1;
+                        parityRx += sample;
+                    }
+                    else if (bitNum == 8) {
+                        // parity bit
+                        if(sample != (parityRx & 0x01))
+                        {
+                            decState = STARTBIT;
+                        }
+                        else {
+                            bitNum += 1;
+                        }
+                    }
+                    else {
+                        // we should now have the stopbit
+                        if (sample == 1) {
+                            // we have a new and valid byte!
+                            performUpperCallback(mgrPtr, uartByte);
+                        }
+                        decState = STARTBIT;
+                    }
+                }
+                else if (diff > LONG) {
+                    decState = STARTBIT;
+                }
+                else if (diff < LONG){
+                    // don't update the phase as we have to look for the next transition
+                    lastSample = sample;
+                    continue;
+                }
+                
+                break;
+            default:
+                break;
+        }
+        lastPhase = phase;
 		lastSample = sample;
 	}
 }
 
-static void doUartEncode(void *inRefCon,UInt32 inNumberFrames, AudioBufferList *ioData)
+static void doUartEncode(HiJackMgr *mgrPtr, UInt32 inNumberFrames, AudioBuffer *outBuff)
 {
 
     SInt32 values[inNumberFrames];
@@ -229,17 +229,14 @@ static void doUartEncode(void *inRefCon,UInt32 inNumberFrames, AudioBufferList *
 	static uint8_t state = STARTBIT;
 	static float uartBitEnc[SAMPLESPERBIT];
 	static uint8_t currentBit = 1;
-
 	static int byteCounter = 1;
 	static UInt8 parityTx = 0;
     
-    HiJackMgr *THIS = (HiJackMgr *)inRefCon;
-    
     for(int j = 0; j< inNumberFrames; j++) {
         if ( phaseEnc >= nextPhaseEnc){
-            if (uartBitTx >= NUMSTOPBITS && THIS->newByte == TRUE) {
+            if (uartBitTx >= NUMSTOPBITS && mgrPtr->newByte == TRUE) {
                 state = STARTBIT;
-                THIS->newByte = FALSE;
+                mgrPtr->newByte = FALSE;
             } else {
                 state = NEXTBIT;
             }
@@ -249,7 +246,7 @@ static void doUartEncode(void *inRefCon,UInt32 inNumberFrames, AudioBufferList *
             case STARTBIT:
             {
 
-                uartByteTx = THIS->uartByteTransmit;
+                uartByteTx = mgrPtr->uartByteTransmit;
                 byteCounter += 1;
                 uartBitTx = 0;
                 parityTx = 0;
@@ -266,10 +263,12 @@ static void doUartEncode(void *inRefCon,UInt32 inNumberFrames, AudioBufferList *
                     if (uartBitTx == 9) {
                         // parity bit
                         nextBit = parityTx & 0x01;
-                    } else if (uartBitTx >= 10) {
+                    }
+                    else if (uartBitTx >= 10) {
                         // stop bit
                         nextBit = 1;
-                    } else {
+                    }
+                    else {
                         nextBit = (uartByteTx >> (uartBitTx - 1)) & 0x01;
                         parityTx += nextBit;
                     }
@@ -278,27 +277,28 @@ static void doUartEncode(void *inRefCon,UInt32 inNumberFrames, AudioBufferList *
                     if (nextBit == 0) {
                         for( uint8_t p = 0; p<SAMPLESPERBIT; p++)
                         {
-                            uartBitEnc[p] = -sin(M_PI * 2.0f / THIS->hwSampleRate * HIGHFREQ * (p+1));
+                            uartBitEnc[p] = -sin(M_PI * 2.0f / mgrPtr->hwSampleRate * HIGHFREQ * (p+1));
                         }
                     } else {
                         for( uint8_t p = 0; p<SAMPLESPERBIT; p++)
                         {
-                            uartBitEnc[p] = sin(M_PI * 2.0f / THIS->hwSampleRate * HIGHFREQ * (p+1));
+                            uartBitEnc[p] = sin(M_PI * 2.0f / mgrPtr->hwSampleRate * HIGHFREQ * (p+1));
                         }
                     }
                 } else {
                     if (nextBit == 0) {
                         for( uint8_t p = 0; p<SAMPLESPERBIT; p++)
                         {
-                            uartBitEnc[p] = sin(M_PI * 2.0f / THIS->hwSampleRate * LOWFREQ * (p+1));
+                            uartBitEnc[p] = sin(M_PI * 2.0f / mgrPtr->hwSampleRate * LOWFREQ * (p+1));
                         }
                     } else {
                         for( uint8_t p = 0; p<SAMPLESPERBIT; p++)
                         {
-                            uartBitEnc[p] = -sin(M_PI * 2.0f / THIS->hwSampleRate * LOWFREQ * (p+1));
+                            uartBitEnc[p] = -sin(M_PI * 2.0f / mgrPtr->hwSampleRate * LOWFREQ * (p+1));
                         }
                     }
                 }
+                
                 currentBit = nextBit;
                 uartBitTx++;
                 state = SAMEBIT;
@@ -315,9 +315,10 @@ static void doUartEncode(void *inRefCon,UInt32 inNumberFrames, AudioBufferList *
         phaseEnc++;
         
     }
-    memcpy(ioData->mBuffers[0].mData, values, ioData->mBuffers[0].mDataByteSize);
-
+    
+    memcpy(outBuff->mData, values, outBuff->mDataByteSize);
 }
+
 
 static void doUartPowerGeneration(UInt32 inNumberFrames, AudioBuffer *outBuff)
 {
@@ -331,6 +332,7 @@ static void doUartPowerGeneration(UInt32 inNumberFrames, AudioBuffer *outBuff)
     memcpy(outBuff->mData, values, outBuff->mDataByteSize);
 }
 
+
 static OSStatus	PerformThru(
     void *inRefCon, 
     AudioUnitRenderActionFlags *ioActionFlags,
@@ -341,20 +343,27 @@ static OSStatus	PerformThru(
 {
 	HiJackMgr *THIS = (HiJackMgr *)inRefCon;
     
-	OSStatus err = AudioUnitRender(THIS->rioUnit, ioActionFlags, inTimeStamp, 1, inNumberFrames, ioData);
-	if (err) { printf("PerformThru: error %d\n", (int)err); return err; }
-	
-	SInt32* lchannel = (SInt32*)(ioData->mBuffers[0].mData);
-	
-	doUartDecode(inRefCon, inNumberFrames, lchannel);
-	
+	OSStatus err = AudioUnitRender(
+        THIS->rioUnit,
+        ioActionFlags,
+        inTimeStamp,
+        1,
+        inNumberFrames,
+        ioData
+    );
     
-	if (THIS->mute == NO) {
-		// prepare sine wave
-		doUartPowerGeneration(inNumberFrames, &ioData->mBuffers[1]);
-        doUartEncode(inRefCon, inNumberFrames, ioData);
-	}
+	if (err) {
+        printf("PerformThru: error %d\n", (int)err);
+        return err;
+    }
+
+	doUartDecode(THIS, inNumberFrames, &ioData->mBuffers[0]);
 	
+	if (THIS->mute == NO) {
+		doUartPowerGeneration(inNumberFrames, &ioData->mBuffers[1]);
+        doUartEncode(THIS, inNumberFrames, &ioData->mBuffers[0]);
+	}
+    
 	return err;
 }
 
@@ -363,17 +372,19 @@ static OSStatus	PerformThru(
 	theDelegate = delegate;
 }
 
+
 - (id) init {
-	inputProc.inputProc = PerformThru;
-	inputProc.inputProcRefCon = self;
 	newByte = FALSE;
-	
     [self initAudio];
-    
 	return self;
 }
 
+
 - (void) initAudio {
+
+	inputProc.inputProc = PerformThru;
+	inputProc.inputProcRefCon = self;
+    
 	try {	
 		// Initialize and configure the audio session
 		XThrowIfError(
