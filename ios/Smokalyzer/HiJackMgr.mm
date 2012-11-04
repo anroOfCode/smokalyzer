@@ -13,21 +13,16 @@
 #import "CAXException.h"
 #import "aurio_helper.h"
 
-#define fc 1200
-#define df 100
-#define T (1/df)
-#define N (SInt32)(T * THIS->hwSampleRate)
-
 // threshold used to detect start bit
 #define THRESHOLD 0 
 
 // baud rate. best to take a divisible number for 44.1kS/s
 #define HIGHFREQ 1378.125 
+#define LOWFREQ (HIGHFREQ / 2)
 
 // (44100 / HIGHFREQ)  // how many samples per UART bit
 #define SAMPLESPERBIT 32 
 
-#define LOWFREQ (HIGHFREQ / 2)
 #define SHORT (SAMPLESPERBIT/2 + SAMPLESPERBIT/4)
 #define LONG (SAMPLESPERBIT + SAMPLESPERBIT/2)
 
@@ -35,8 +30,6 @@
 #define NUMSTOPBITS 100 
 
 #define AMPLITUDE (1<<24)
-
-#define DEBUG2 // output the byte values encoded
 
 enum uart_state {
 	STARTBIT = 0,
@@ -101,8 +94,7 @@ void propListener(	void *                  inClientData,
 			CFStringRef newRoute;
 			size = sizeof(CFStringRef);
 			XThrowIfError(AudioSessionGetProperty(kAudioSessionProperty_AudioRoute, &size, &newRoute), "couldn't get new audio route");
-			if (newRoute)
-			{	
+			if (newRoute) {	
 				CFShow(newRoute);
 			}
 		} catch (CAXException e) {
@@ -125,15 +117,18 @@ static void performUpperCallback(HiJackMgr *mgrPtr, UInt8 byte)
     [autoreleasepool release];
 }
 
+
 static bool isValidLength(UInt32 val)
 {
     return ( SHORT < val) && (val < LONG);
 }
 
+
 static bool isTooShort(UInt32 val)
 {
     return val < SHORT;
 }
+
 
 static void doUartDecode(HiJackMgr *mgrPtr, UInt32 inNumberFrames, AudioBuffer *inBuff)
 {
@@ -215,6 +210,7 @@ static void doUartDecode(HiJackMgr *mgrPtr, UInt32 inNumberFrames, AudioBuffer *
 	}
 }
 
+
 static uint8_t getNextBit(uint32_t uartBitTx, uint8_t uartByteTx, uint8_t parity)
 {
     uint8_t nextBit;
@@ -239,76 +235,74 @@ static uint8_t getNextBit(uint32_t uartBitTx, uint8_t uartByteTx, uint8_t parity
     return nextBit;
 }
 
+
+static float getSign(uint8_t currentBit, uint8_t nextBit)
+{
+    if (
+        (nextBit == currentBit && nextBit == 0) ||
+        (nextBit != currentBit && nextBit == 1)
+    ) {
+        return -1.0;
+    }
+    else {
+        return 1.0;
+    }
+}
+
+
+static float getFreq(uint8_t currentBit, uint8_t nextBit)
+{
+    if (nextBit == currentBit) {
+        return HIGHFREQ;
+    } else {
+        return LOWFREQ;
+    }
+}
+
+
 static void doUartEncode(HiJackMgr *mgrPtr, UInt32 inNumberFrames, AudioBuffer *outBuff)
 {
 
     SInt32 values[inNumberFrames];
     
 	// UART encode
-	static uint32_t phaseEnc = 0;
-	static uint32_t nextPhaseEnc = SAMPLESPERBIT;
+	static uint32_t period = SAMPLESPERBIT;
     
 	static uint8_t uartByteTx = 0x0;
 	static uint32_t uartBitTx = 0;
-	static uint8_t state = STARTBIT;
+    
 	static float uartBitEnc[SAMPLESPERBIT];
 	static uint8_t currentBit = 1;
-	static int byteCounter = 1;
-	static UInt8 parityTx = 0;
+	static uint8_t parityTx = 0;
     
     for(int j = 0; j< inNumberFrames; j++) {
-        if ( phaseEnc >= nextPhaseEnc){
+        if (period == SAMPLESPERBIT) {
+            period = 0;
+        
+            // We're at a boundray right now, either advance
+            // to the next bit, or start a new byte transmission.
             if (uartBitTx >= NUMSTOPBITS && mgrPtr->newByte == TRUE) {
-                state = STARTBIT;
                 mgrPtr->newByte = FALSE;
-            } else {
-                state = NEXTBIT;
+                
+                uartByteTx = mgrPtr->uartByteTransmit;
+                uartBitTx = 0;
+                parityTx = 0;                
             }
-        }
-        
-        if (state == STARTBIT) {
-            uartByteTx = mgrPtr->uartByteTransmit;
-            byteCounter += 1;
-            uartBitTx = 0;
-            parityTx = 0;
-            state = NEXTBIT;     
-        }
-        
-        if (state == NEXTBIT) {
+            
             uint8_t nextBit = getNextBit(uartBitTx, uartByteTx, parityTx);
             
-            float sign = 1.0;
-            float freq = 0.0;
-            
-            if (nextBit == currentBit) {
-                freq = HIGHFREQ;
-            } else {
-                freq = LOWFREQ;
-            }
-            
-            if (
-                (nextBit == currentBit && nextBit == 0) ||
-                (nextBit != currentBit && nextBit == 1)
-            ) {
-                sign = -1.0;
-            }
-            
+            float sign = getSign(currentBit, nextBit);
+            float freq = getFreq(currentBit, nextBit);
+
             for (uint8_t p = 0; p<SAMPLESPERBIT; p++) {
-                uartBitEnc[p] = sign * sin(M_PI * 2.0f / mgrPtr->hwSampleRate * freq * (p+1));
+                uartBitEnc[p] = sign * sin(M_PI * 2.0f / mgrPtr->hwSampleRate * freq * (p+1)) * AMPLITUDE;
             }
             
             currentBit = nextBit;
             uartBitTx++;
-            
-            phaseEnc = 0;
-            nextPhaseEnc = SAMPLESPERBIT;
-            
-            state = SAMEBIT;
         }
 
-        values[j] = (SInt32)(uartBitEnc[phaseEnc%SAMPLESPERBIT] * AMPLITUDE);
-        phaseEnc++;
-        
+        values[j] = (SInt32)(uartBitEnc[period++]);
     }
     
     memcpy(outBuff->mData, values, outBuff->mDataByteSize);
