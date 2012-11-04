@@ -215,6 +215,30 @@ static void doUartDecode(HiJackMgr *mgrPtr, UInt32 inNumberFrames, AudioBuffer *
 	}
 }
 
+static uint8_t getNextBit(uint32_t uartBitTx, uint8_t uartByteTx, uint8_t parity)
+{
+    uint8_t nextBit;
+    
+    if (uartBitTx == 0) {
+        // start bit
+        nextBit = 0;
+    }
+    else if (uartBitTx == 9) {
+        // parity bit
+        nextBit = parity & 0x01;
+    }
+    else if (uartBitTx >= 10) {
+        // stop bit
+        nextBit = 1;
+    }
+    else {
+        nextBit = (uartByteTx >> (uartBitTx - 1)) & 0x01;
+        parity += nextBit;
+    }
+    
+    return nextBit;
+}
+
 static void doUartEncode(HiJackMgr *mgrPtr, UInt32 inNumberFrames, AudioBuffer *outBuff)
 {
 
@@ -223,6 +247,7 @@ static void doUartEncode(HiJackMgr *mgrPtr, UInt32 inNumberFrames, AudioBuffer *
 	// UART encode
 	static uint32_t phaseEnc = 0;
 	static uint32_t nextPhaseEnc = SAMPLESPERBIT;
+    
 	static uint8_t uartByteTx = 0x0;
 	static uint32_t uartBitTx = 0;
 	static uint8_t state = STARTBIT;
@@ -241,75 +266,46 @@ static void doUartEncode(HiJackMgr *mgrPtr, UInt32 inNumberFrames, AudioBuffer *
             }
         }
         
-        switch (state) {
-            case STARTBIT:
-            {
-
-                uartByteTx = mgrPtr->uartByteTransmit;
-                byteCounter += 1;
-                uartBitTx = 0;
-                parityTx = 0;
-                
-                state = NEXTBIT;
-            }
-            case NEXTBIT:
-            {
-                uint8_t nextBit;
-                if (uartBitTx == 0) {
-                    // start bit
-                    nextBit = 0;
-                } else {
-                    if (uartBitTx == 9) {
-                        // parity bit
-                        nextBit = parityTx & 0x01;
-                    }
-                    else if (uartBitTx >= 10) {
-                        // stop bit
-                        nextBit = 1;
-                    }
-                    else {
-                        nextBit = (uartByteTx >> (uartBitTx - 1)) & 0x01;
-                        parityTx += nextBit;
-                    }
-                }
-                if (nextBit == currentBit) {
-                    if (nextBit == 0) {
-                        for( uint8_t p = 0; p<SAMPLESPERBIT; p++)
-                        {
-                            uartBitEnc[p] = -sin(M_PI * 2.0f / mgrPtr->hwSampleRate * HIGHFREQ * (p+1));
-                        }
-                    } else {
-                        for( uint8_t p = 0; p<SAMPLESPERBIT; p++)
-                        {
-                            uartBitEnc[p] = sin(M_PI * 2.0f / mgrPtr->hwSampleRate * HIGHFREQ * (p+1));
-                        }
-                    }
-                } else {
-                    if (nextBit == 0) {
-                        for( uint8_t p = 0; p<SAMPLESPERBIT; p++)
-                        {
-                            uartBitEnc[p] = sin(M_PI * 2.0f / mgrPtr->hwSampleRate * LOWFREQ * (p+1));
-                        }
-                    } else {
-                        for( uint8_t p = 0; p<SAMPLESPERBIT; p++)
-                        {
-                            uartBitEnc[p] = -sin(M_PI * 2.0f / mgrPtr->hwSampleRate * LOWFREQ * (p+1));
-                        }
-                    }
-                }
-                
-                currentBit = nextBit;
-                uartBitTx++;
-                state = SAMEBIT;
-                phaseEnc = 0;
-                nextPhaseEnc = SAMPLESPERBIT;
-                
-                break;
-            }
-            default:
-                break;
+        if (state == STARTBIT) {
+            uartByteTx = mgrPtr->uartByteTransmit;
+            byteCounter += 1;
+            uartBitTx = 0;
+            parityTx = 0;
+            state = NEXTBIT;     
         }
         
+        if (state == NEXTBIT) {
+            uint8_t nextBit = getNextBit(uartBitTx, uartByteTx, parityTx);
+            
+            float sign = 1.0;
+            float freq = 0.0;
+            
+            if (nextBit == currentBit) {
+                freq = HIGHFREQ;
+            } else {
+                freq = LOWFREQ;
+            }
+            
+            if (
+                (nextBit == currentBit && nextBit == 0) ||
+                (nextBit != currentBit && nextBit == 1)
+            ) {
+                sign = -1.0;
+            }
+            
+            for (uint8_t p = 0; p<SAMPLESPERBIT; p++) {
+                uartBitEnc[p] = sign * sin(M_PI * 2.0f / mgrPtr->hwSampleRate * freq * (p+1));
+            }
+            
+            currentBit = nextBit;
+            uartBitTx++;
+            
+            phaseEnc = 0;
+            nextPhaseEnc = SAMPLESPERBIT;
+            
+            state = SAMEBIT;
+        }
+
         values[j] = (SInt32)(uartBitEnc[phaseEnc%SAMPLESPERBIT] * AMPLITUDE);
         phaseEnc++;
         
