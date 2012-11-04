@@ -125,6 +125,16 @@ static void performUpperCallback(HiJackMgr *mgrPtr, UInt8 byte)
     [autoreleasepool release];
 }
 
+static bool isValidLength(UInt32 val)
+{
+    return ( SHORT < val) && (val < LONG);
+}
+
+static bool isTooShort(UInt32 val)
+{
+    return val < SHORT;
+}
+
 static void doUartDecode(HiJackMgr *mgrPtr, UInt32 inNumberFrames, AudioBuffer *inBuff)
 {
     static UInt32 phase = 0;
@@ -151,68 +161,57 @@ static void doUartDecode(HiJackMgr *mgrPtr, UInt32 inNumberFrames, AudioBuffer *
             continue;
         }
         
+        Boolean resetState = true;
+        
         switch (decState) {
             case STARTBIT:
                 if (lastSample == 0 && sample == 1) {
                     // low->high transition. Now wait for a long period
                     decState = STARTBIT_FALL;
+                    resetState = false;
                 }
                 break;
             case STARTBIT_FALL:
-                if (( SHORT < diff ) && (diff < LONG) )
-                {
+                if (isValidLength(diff)) {
                     // looks like we got a 1->0 transition,
                     // start actually decoding the signal.
                     bitNum = 0;
                     parityRx = 0;
                     uartByte = 0;
+                    
                     decState = DECODE;
-                } else {
-                    decState = STARTBIT;
+                    resetState = false;
                 }
                 break;
             case DECODE:
-                if (( SHORT < diff) && (diff < LONG) ) {
+                if (isValidLength(diff)) {
                     // we got a valid sample.
                     if (bitNum < 8) {
                         uartByte = ((uartByte >> 1) + (sample << 7));
                         bitNum += 1;
                         parityRx += sample;
+                        resetState = false;
                     }
-                    else if (bitNum == 8) {
-                        // parity bit
-                        if(sample != (parityRx & 0x01))
-                        {
-                            decState = STARTBIT;
-                        }
-                        else {
-                            bitNum += 1;
-                        }
-                    }
-                    else {
-                        // we should now have the stopbit
-                        if (sample == 1) {
-                            // we have a new and valid byte!
-                            performUpperCallback(mgrPtr, uartByte);
-                        }
-                        decState = STARTBIT;
+                    else if(sample == (parityRx & 0x01)) {
+                        printf("calll: %X\n", uartByte);
+                        performUpperCallback(mgrPtr, uartByte);
                     }
                 }
-                else if (diff > LONG) {
-                    decState = STARTBIT;
-                }
-                else if (diff < LONG){
+                else if (isTooShort(diff)){
                     // don't update the phase as we have to look for the next transition
                     lastSample = sample;
                     continue;
                 }
-                
                 break;
             default:
                 break;
         }
         lastPhase = phase;
 		lastSample = sample;
+        
+        if (resetState) {
+            decState = STARTBIT;
+        }
 	}
 }
 
