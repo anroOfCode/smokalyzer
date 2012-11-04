@@ -33,6 +33,7 @@
 	
 - (void) setDelegate:(id <HiJackDelegate>) delegate;
 - (id) init;
+- (void) initAudio;
 - (int) send:(UInt8)data;
 	
 @property (nonatomic, assign)	AudioUnit				rioUnit;
