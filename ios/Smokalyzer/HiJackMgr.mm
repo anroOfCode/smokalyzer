@@ -129,27 +129,29 @@ static bool isTooShort(UInt32 val)
     return val < SHORT;
 }
 
+static void setupDecode(int & bitNum, uint8_t & parity, uint8_t & uartByte) {
+
+}
 
 static void doUartDecode(HiJackMgr *mgrPtr, UInt32 inNumberFrames, AudioBuffer *inBuff)
 {
-    static UInt32 phase = 0;
-    static Boolean sample = 0;
+    static uint32_t period = 0;
     
-    static UInt32 lastPhase = 0;
-    static UInt32 lastSample = 0;
+    static Boolean sample = 0;
+    static Boolean lastSample = 0;
     
     static int decState = STARTBIT;
 	static int bitNum = 0;
     
 	static uint8_t uartByte = 0;
-    static UInt8 parityRx = 0;
+    static uint8_t parityRx = 0;
 
 	for(int j = 0; j < inNumberFrames; j++) {
     
 		float val = *(((SInt32*) inBuff->mData) + j);
-        SInt32 diff = phase - lastPhase;
+
+		period += 1;
         
-		phase += 1;
         sample = !(val < THRESHOLD);
         
 		if (sample == lastSample) {
@@ -167,7 +169,7 @@ static void doUartDecode(HiJackMgr *mgrPtr, UInt32 inNumberFrames, AudioBuffer *
                 }
                 break;
             case STARTBIT_FALL:
-                if (isValidLength(diff)) {
+                if (isValidLength(period)) {
                     // looks like we got a 1->0 transition,
                     // start actually decoding the signal.
                     bitNum = 0;
@@ -179,7 +181,7 @@ static void doUartDecode(HiJackMgr *mgrPtr, UInt32 inNumberFrames, AudioBuffer *
                 }
                 break;
             case DECODE:
-                if (isValidLength(diff)) {
+                if (isValidLength(period)) {
                     // we got a valid sample.
                     if (bitNum < 8) {
                         uartByte = ((uartByte >> 1) + (sample << 7));
@@ -188,11 +190,11 @@ static void doUartDecode(HiJackMgr *mgrPtr, UInt32 inNumberFrames, AudioBuffer *
                         resetState = false;
                     }
                     else if(sample == (parityRx & 0x01)) {
-                        printf("calll: %X\n", uartByte);
+                        printf("Received: 0x%X\n", uartByte);
                         performUpperCallback(mgrPtr, uartByte);
                     }
                 }
-                else if (isTooShort(diff)){
+                else if (isTooShort(period)){
                     // don't update the phase as we have to look for the next transition
                     lastSample = sample;
                     continue;
@@ -201,7 +203,8 @@ static void doUartDecode(HiJackMgr *mgrPtr, UInt32 inNumberFrames, AudioBuffer *
             default:
                 break;
         }
-        lastPhase = phase;
+        
+        period = 0;
 		lastSample = sample;
         
         if (resetState) {
